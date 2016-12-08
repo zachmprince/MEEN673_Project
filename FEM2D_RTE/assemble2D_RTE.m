@@ -8,7 +8,11 @@ T_prev = sol.T(:,:,nt);
 % Allocate global arrays
 num_nodes = mesh.Nx*mesh.Ny;
 num_elem = mesh.nx*mesh.ny;
-K = sparse([],[],[],2*num_nodes,2*num_nodes,2*mesh.npe*num_elem);
+if num_nodes > 100
+    K = sparse([],[],[],2*num_nodes,2*num_nodes,2*mesh.npe*num_elem);
+else
+    K = zeros(2*num_nodes,2*num_nodes);
+end
 F = zeros(2*num_nodes,1);
 
 % Assemble arrays

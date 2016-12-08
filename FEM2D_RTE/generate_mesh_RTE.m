@@ -95,12 +95,12 @@ if strcmp(mesh.type,'linear')
             mesh.bdy(n,3,2) = 2;
         end
         if j==mesh.ny 
-            mesh.bdy(n,4,1) = 4;
-            mesh.bdy(n,4,2) = 3;
+            mesh.bdy(n,4,1) = 3;
+            mesh.bdy(n,4,2) = 4;
         end
         if i==1
-            mesh.bdy(n,1,1) = 1;
-            mesh.bdy(n,1,2) = 4;
+            mesh.bdy(n,1,1) = 4;
+            mesh.bdy(n,1,2) = 1;
         end
         if i==mesh.nx 
             mesh.bdy(n,2,1) = 2;
@@ -120,14 +120,14 @@ elseif strcmp(mesh.type,'quadratic')
             mesh.bdy(n,3,3) = 2;
         end
         if j==mesh.ny 
-            mesh.bdy(n,4,1) = 4;
+            mesh.bdy(n,4,1) = 3;
             mesh.bdy(n,4,2) = 7;
-            mesh.bdy(n,4,3) = 3;
+            mesh.bdy(n,4,3) = 4;
         end
         if i==1
-            mesh.bdy(n,1,1) = 1;
+            mesh.bdy(n,1,1) = 4;
             mesh.bdy(n,1,2) = 8;
-            mesh.bdy(n,1,3) = 4;
+            mesh.bdy(n,1,3) = 1;
         end
         if i==mesh.nx 
             mesh.bdy(n,2,1) = 2;
