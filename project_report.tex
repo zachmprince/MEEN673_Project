@@ -19,7 +19,7 @@
 \usepackage{fancyhdr}
 \usepackage{multirow}
 \usepackage{listings}
-%\usepackage[numbers,sort&compress]{natbib}[2010/09/13]
+\usepackage[numbers,sort&compress]{natbib}[2010/09/13]
 \usepackage{mathptmx}
 
 %  new definitions
@@ -69,7 +69,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \lhead{Prince - MEEN 673 Project}
-\rfoot{Draft}
+\rfoot{Final}
 \cfoot{\thepage}
 
 
@@ -122,7 +122,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-This purpose of this paper is to detail a project involving the finite element implementation of a nonlinear system of partial differential equations.  The project focuses on the evaluation of the time dependent radiation diffusion equation.  The implementation involves defining the weak form of the equations, developing the finite element model, and detailing the nonlinear iteration process. \\
+This purpose of this paper is to detail a project involving the finite element implementation of a nonlinear system of partial differential equations.  The project focuses on the evaluation of the time dependent radiation diffusion equation \cite{Mousseau_2000,Knoll_1999}.  The implementation involves defining the weak form of the equations, developing the finite element model, and detailing the nonlinear iteration process. \\
 
 The time dependent radiation diffusion equations are defined in \eqref{eq:RTE}.  Where $E$ is the photon energy and $T$ is the material temperature.
 \begin{subequations}
@@ -318,12 +318,100 @@ T^{12}_{ij} = \hat{K}^{12}_{ij} + \theta\Delta t \left[ \int_{\Omega^e} \frac{T_
 T^{21}_{ij} = \hat{K}^{21}_{ij}
 \ee
 \be 
-T^{22}_{ij} = \hat{K}^{22}_{ij} + \theta\Delta t \left[ \int_{\Omega^e} \frac{5}{2}T_{s+1}^{3/2} \left(\grad\psi_i\cdot\grad T_{s+1}\right)\psi_jdxdy + \int_{\Omega^e} \frac{3cz^3}{T_{s+1}^3} \psi_i\psi_jdxdy\right]
+T^{22}_{ij} = \hat{K}^{22}_{ij} + \theta\Delta t \left[ \int_{\Omega^e} \frac{5}{2}T_{s+1}^{3/2} \left(\grad\psi_i\cdot\grad T_{s+1}\right)\psi_jdxdy + \int_{\Omega^e} \frac{3cz^3}{T_{s+1}^4} E_{s+1} \psi_i\psi_jdxdy\right]
 \ee
 
 \label{eq:tan}
 \end{subequations}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{\bf Examples}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\bf Quasi-1D Example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The first example comes from \cite{Mousseau_2000} which is a two-dimensional problem, but solution is constant in one direction.  The material properties, boundary and initial conditions are shown in \eqref{eq:init}. A 32X32, 64X64, 128X128, and 256X256 mesh was used with linear elements.  Reduced Newton-Cotes integration was used for all nonlinear terms, this insured that the temperature would be positive and not confuse the $D_t$ term. Backward Euler discretization ($\theta = 1$) was used with $\Delta t = 0.05$ and simulated 1.5 seconds.
+
+\begin{subequations}
+\be
+z = c = a = C_v = 1.0 \qquad k = 0.1
+\ee
+\be 
+E(x,y,0) = 1.0 \times 10^{-5} \qquad T(x,y,0) = (E(x,y,0)/a)^{1/4} = 5.62 \times 10^{-5}
+\ee
+\be 
+\frac{1}{4}E-\frac{D_r}{2}\frac{\partial E}{\partial \vec{n}} = 1 \qquad x=0
+\ee
+\be 
+\frac{1}{4}E+\frac{D_r}{2}\frac{\partial E}{\partial \vec{n}} = 0 \qquad x=1
+\ee
+\be 
+\frac{\partial E}{\partial \vec{n}} = 0 \qquad y=0, x=0
+\ee
+\be 
+\frac{\partial T}{\partial \vec{n}} = 0 \qquad \text{all boundaries}
+\ee
+\label{eq:init}
+\end{subequations}
+
+The results from \cite{Mousseau_2000} are shown in \fig{fig:ex1_paper} and the results of my simulations are in \fig{fig:ex1}.  It is important to note that the paper uses a different definition of $\sigma_a$ which, in practice, reduces the speed of the thermal wave by approximately half.  Therefore their transient lasted 3.0 seconds, but the shapes and magnitudes of the curves are comparable.
+
+\begin{figure}[htpb!]
+\centering
+\includegraphics[width=0.75\linewidth]{Example1_paper.png}
+\caption{Radiation temperature from \cite{Mousseau_2000}}
+\label{fig:ex1_paper}
+\end{figure}
+
+\begin{figure}[htpb!]
+\centering
+\includegraphics[width=\linewidth]{Example1.png}
+\caption{Radiation temperature for Example 1}
+\label{fig:ex1_paper}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{\bf Two Dimensional Example}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+This next example is exactly the same as the first to the first, except there is an opacity step in the middle of the domain.  This is implemented by varying $z$ in the domain, shown by \eqref{eq:z}.
+
+\be 
+z=\begin{cases}
+Z \quad 1/3 \leq x,y \leq 2/3\\
+1.0 \quad \text{otherwise}
+\end{cases}
+\label{eq:z}
+\ee
+
+Two cases were run: $Z=2.5$ and $Z=10.0$.  The material temperature for the cases are shown in \fig{fig:ex2_1} and \fig{fig:ex2_2} as contour plots, respectively.
+
+\begin{figure}[htpb!]
+\centering
+\includegraphics[width=\linewidth]{Example2_1.png}
+\caption{Material temperature for Example 2 ($Z=2.5$)}
+\label{fig:ex2_1}
+\end{figure}
+
+\begin{figure}[htpb!]
+\centering
+\includegraphics[width=\linewidth]{Example2_2.png}
+\caption{Material temperature for Example 2 ($Z=10.0$)}
+\label{fig:ex2_2}
+\end{figure}
+
+
+\newpage
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{abbrvnat}
+\bibliography{references}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
